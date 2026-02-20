@@ -110,6 +110,13 @@ cat > "$SESSION_FILE" <<EOF
 }
 EOF
 
+# Generate SHA-256 hash
+HASH_FILE="${SESSION_FILE%.json}.sha256"
+HASH=$(shasum -a 256 "$SESSION_FILE" | cut -d ' ' -f 1)
+BASENAME=$(basename "$SESSION_FILE")
+echo "$HASH  $BASENAME" > "$HASH_FILE"
+echo "[PASS] Hash generated: $HASH_FILE"
+
 echo ""
 echo "[PASS] Session recorded: $SESSION_FILE"
 echo ""

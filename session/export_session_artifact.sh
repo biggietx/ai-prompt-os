@@ -81,6 +81,14 @@ mkdir -p "$ARTIFACTS_DIR"
 DEST="$ARTIFACTS_DIR/prompt_session.json"
 cp "$SESSION_FILE" "$DEST"
 
+# Copy hash file if it exists
+HASH_SOURCE="${SESSION_FILE%.json}.sha256"
+HASH_DEST="$ARTIFACTS_DIR/prompt_session.sha256"
+if [ -f "$HASH_SOURCE" ]; then
+  cp "$HASH_SOURCE" "$HASH_DEST"
+  echo "  Hash:        $HASH_DEST"
+fi
+
 echo "[PASS] Session artifact exported."
 echo "  Source: $SESSION_FILE"
 echo "  Destination: $DEST"

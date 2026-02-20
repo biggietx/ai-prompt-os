@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.6.0] - 2026-02-20
+
+### Added
+
+- **SHA-256 hash generation**: `session/record_session.sh` now produces a `.sha256` sidecar file alongside each session JSON for tamper detection.
+- **Hash validation**: `scripts/validate_prompt_artifact.sh` now verifies artifact integrity against the `.sha256` hash file. Mismatches block approval.
+- **ADR-006**: Documents artifact immutability rationale and tamper detection design.
+
+### Changed
+
+- **session/export_session_artifact.sh**: Now copies `.sha256` hash file alongside session JSON during export.
+- All prompt files updated to version 0.6.0 with current timestamps.
+
 ## [0.5.0] - 2026-02-20
 
 ### Added

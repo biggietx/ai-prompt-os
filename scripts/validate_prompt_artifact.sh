@@ -90,6 +90,24 @@ else
   FAIL_COUNT=$((FAIL_COUNT + 1))
 fi
 
+# Hash verification
+HASH_FILE="$ARTIFACTS_DIR/prompt_session.sha256"
+if [ ! -f "$HASH_FILE" ]; then
+  echo "  [FAIL] Hash file missing. Artifact immutability cannot be verified."
+  FAIL_COUNT=$((FAIL_COUNT + 1))
+else
+  EXPECTED_HASH=$(cut -d ' ' -f 1 "$HASH_FILE")
+  ACTUAL_HASH=$(shasum -a 256 "$ARTIFACT" | cut -d ' ' -f 1)
+  if [ "$EXPECTED_HASH" = "$ACTUAL_HASH" ]; then
+    echo "  [PASS] Artifact hash verified."
+  else
+    echo "  [FAIL] Artifact hash mismatch. Possible tampering detected."
+    echo "    Expected: $EXPECTED_HASH"
+    echo "    Actual:   $ACTUAL_HASH"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+  fi
+fi
+
 echo ""
 if [ $FAIL_COUNT -eq 0 ]; then
   echo "[PASS] prompt_session.json validated."
