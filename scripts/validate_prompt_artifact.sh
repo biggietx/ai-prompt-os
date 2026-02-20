@@ -108,6 +108,62 @@ else
   fi
 fi
 
+# Chain integrity validation
+if jq -e '.artifact_hash' "$ARTIFACT" > /dev/null 2>&1 && jq -e '.chain_hash' "$ARTIFACT" > /dev/null 2>&1; then
+  STORED_ARTIFACT_HASH=$(jq -r '.artifact_hash' "$ARTIFACT")
+  STORED_CHAIN_HASH=$(jq -r '.chain_hash' "$ARTIFACT")
+  STORED_TIMESTAMP=$(jq -r '.timestamp_utc' "$ARTIFACT")
+
+  # Recreate base JSON (without artifact_hash and chain_hash) and compute hash
+  BASE_JSON=$(jq 'del(.artifact_hash, .chain_hash)' "$ARTIFACT")
+  COMPUTED_ARTIFACT_HASH=$(printf '%s\n' "$BASE_JSON" | shasum -a 256 | cut -d ' ' -f 1)
+
+  # Compute expected chain hash
+  COMPUTED_CHAIN_HASH=$(printf '%s' "${STORED_ARTIFACT_HASH}${STORED_TIMESTAMP}" | shasum -a 256 | cut -d ' ' -f 1)
+
+  if [ "$STORED_ARTIFACT_HASH" = "$COMPUTED_ARTIFACT_HASH" ] && [ "$STORED_CHAIN_HASH" = "$COMPUTED_CHAIN_HASH" ]; then
+    echo "  [PASS] Chain integrity verified."
+  else
+    if [ "$STORED_ARTIFACT_HASH" != "$COMPUTED_ARTIFACT_HASH" ]; then
+      echo "  [FAIL] Chain integrity violation — artifact_hash mismatch."
+    fi
+    if [ "$STORED_CHAIN_HASH" != "$COMPUTED_CHAIN_HASH" ]; then
+      echo "  [FAIL] Chain integrity violation — chain_hash mismatch."
+    fi
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+  fi
+else
+  echo "  [INFO] No chain fields present — skipping chain validation."
+fi
+
+# Policy version enforcement
+POLICY_FILE="$(cd "$(dirname "$0")/.." && pwd)/policy/promptos_policy.json"
+if [ -f "$POLICY_FILE" ] && command -v jq > /dev/null 2>&1; then
+  REQUIRED_VERSION=$(jq -r '.required_promptos_version' "$POLICY_FILE")
+  ARTIFACT_VERSION=$(jq -r '.prompt_os_version' "$ARTIFACT")
+  if [ "$REQUIRED_VERSION" = "$ARTIFACT_VERSION" ]; then
+    echo "  [PASS] PromptOS version matches policy."
+  else
+    echo "  [FAIL] PromptOS version mismatch."
+    echo "    Required: $REQUIRED_VERSION"
+    echo "    Found:    $ARTIFACT_VERSION"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+  fi
+
+  # Check chain validation requirement
+  REQUIRE_CHAIN=$(jq -r '.require_chain_validation // false' "$POLICY_FILE")
+  if [ "$REQUIRE_CHAIN" = "true" ]; then
+    if ! jq -e '.artifact_hash' "$ARTIFACT" > /dev/null 2>&1 || ! jq -e '.chain_hash' "$ARTIFACT" > /dev/null 2>&1; then
+      echo "  [FAIL] Policy requires chain validation but artifact lacks chain fields."
+      FAIL_COUNT=$((FAIL_COUNT + 1))
+    fi
+  fi
+else
+  if [ ! -f "$POLICY_FILE" ]; then
+    echo "  [INFO] No policy file found — skipping version enforcement."
+  fi
+fi
+
 echo ""
 if [ $FAIL_COUNT -eq 0 ]; then
   echo "[PASS] prompt_session.json validated."

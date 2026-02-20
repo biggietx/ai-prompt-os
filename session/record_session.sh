@@ -96,7 +96,7 @@ fi
 # Escape notes for JSON (basic: replace quotes and newlines)
 NOTES_ESCAPED=$(echo "$NOTES" | sed 's/\\/\\\\/g; s/"/\\"/g')
 
-# Write session JSON
+# Write base session JSON (without chain fields)
 SESSION_FILE="$LOGS_DIR/session-${SESSION_ID}.json"
 cat > "$SESSION_FILE" <<EOF
 {
@@ -110,7 +110,22 @@ cat > "$SESSION_FILE" <<EOF
 }
 EOF
 
-# Generate SHA-256 hash
+# Normalize base JSON with jq for deterministic hashing
+NORMALIZED_BASE=$(jq '.' "$SESSION_FILE")
+printf '%s\n' "$NORMALIZED_BASE" > "$SESSION_FILE"
+
+# Compute artifact hash from normalized base content
+ARTIFACT_HASH=$(shasum -a 256 "$SESSION_FILE" | cut -d ' ' -f 1)
+
+# Compute chain hash: sha256(artifact_hash + timestamp_utc)
+CHAIN_HASH=$(printf '%s' "${ARTIFACT_HASH}${TIMESTAMP}" | shasum -a 256 | cut -d ' ' -f 1)
+
+# Add chain fields using jq to maintain normalized format
+FINAL_JSON=$(jq --arg ah "$ARTIFACT_HASH" --arg ch "$CHAIN_HASH" \
+  '. + {"artifact_hash": $ah, "chain_hash": $ch}' "$SESSION_FILE")
+printf '%s\n' "$FINAL_JSON" > "$SESSION_FILE"
+
+# Generate SHA-256 sidecar from final file
 HASH_FILE="${SESSION_FILE%.json}.sha256"
 HASH=$(shasum -a 256 "$SESSION_FILE" | cut -d ' ' -f 1)
 BASENAME=$(basename "$SESSION_FILE")

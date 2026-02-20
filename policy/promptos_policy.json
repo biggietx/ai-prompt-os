@@ -1,0 +1,7 @@
+{
+  "required_promptos_version": "v0.8.0",
+  "enforce_hash_validation": true,
+  "require_prompts_declared": true,
+  "require_chain_validation": true,
+  "require_run_binding": true
+}

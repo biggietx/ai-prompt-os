@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.8.0] - 2026-02-20
+
+### Added
+
+- **Chain hash fields**: `session/record_session.sh` now embeds `artifact_hash` and `chain_hash` in session JSON for deterministic chain binding.
+- **Chain validation**: `scripts/validate_prompt_artifact.sh` recomputes and verifies artifact_hash and chain_hash integrity.
+- **integration/drift_lock_check.sh**: Standalone drift detection — verifies artifact existence, sidecar hash, artifact_hash, and chain_hash in one command.
+- **integration/bind_to_run_record.sh**: Binds prompt governance hashes into Orchestrator run records under a `governance` key.
+- **ADR-008**: Documents run chain binding, replay prevention, and drift detection design.
+
+### Changed
+
+- **policy/promptos_policy.json**: Added `require_chain_validation` and `require_run_binding` flags. Updated required version to v0.8.0.
+- **scripts/validate_prompt_artifact.sh**: Now enforces chain validation when policy requires it.
+- All prompt files updated to version 0.8.0 with current timestamps.
+
+## [0.7.0] - 2026-02-20
+
+### Added
+
+- **policy/promptos_policy.json**: Governance policy file defining required PromptOS version, hash enforcement, and prompt declaration requirements.
+- **integration/attach_prompt_to_run.sh**: Copies session artifact and hash into Orchestrator run artifacts `prompt/` subdirectory.
+- **integration/verification_gate_enforcer.sh**: Orchestrator-callable wrapper that blocks verification gate on artifact validation failure.
+- **ADR-007**: Documents orchestrator policy enforcement and governance loop completion.
+
+### Changed
+
+- **scripts/validate_prompt_artifact.sh**: Added policy-level version enforcement — rejects artifacts from non-matching PromptOS version.
+- All prompt files updated to version 0.7.0 with current timestamps.
+
 ## [0.6.0] - 2026-02-20
 
 ### Added
