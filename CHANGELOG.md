@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-02-19
+
+### Added
+
+- **session/record_session.sh**: CLI session recorder with argument parsing, auto-version detection, and lint-gated JSON output.
+- **session/schema_prompt_session.json**: JSON schema for session log artifacts.
+- **.git-hooks/pre-commit**: Pre-commit hook that runs prompt lint before allowing commits.
+- **scripts/install_hooks.sh**: Installer script for git hooks (manual opt-in, not auto-installed).
+- **scripts/ci_check.sh**: CI-ready validation script — runs lint, validates registry structure, confirms all registered prompt files exist.
+- **ADR-003**: Documents session recording and enforcement decisions.
+
+### Changed
+
+- All prompt files updated to version 0.3.0 with current timestamps.
+
 ## [0.2.0] - 2026-02-19
 
 ### Added

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Prompt OS Session Log",
+  "description": "Schema for governed prompt session recordings.",
+  "type": "object",
+  "required": [
+    "timestamp_utc",
+    "prompt_os_version",
+    "prompts_used",
+    "developer",
+    "target_repo",
+    "notes",
+    "lint_passed"
+  ],
+  "properties": {
+    "timestamp_utc": {
+      "type": "string",
+      "description": "UTC timestamp in ISO-8601 format.",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+    },
+    "prompt_os_version": {
+      "type": "string",
+      "description": "Prompt OS version tag (e.g., v0.3.0)."
+    },
+    "prompts_used": {
+      "type": "array",
+      "description": "List of prompt IDs used in this session.",
+      "items": {
+        "type": "string",
+        "pattern": "^P\\d{2}$"
+      },
+      "minItems": 1
+    },
+    "developer": {
+      "type": "string",
+      "description": "Name of the developer who ran the session.",
+      "minLength": 1
+    },
+    "target_repo": {
+      "type": "string",
+      "description": "Name of the repository the session was run against.",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional session notes."
+    },
+    "lint_passed": {
+      "type": "boolean",
+      "description": "Whether prompt lint passed before session recording."
+    }
+  },
+  "additionalProperties": false
+}

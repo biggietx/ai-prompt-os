@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+LINT_SCRIPT="$REPO_ROOT/scripts/lint_prompts.sh"
+
+echo "=== Pre-commit: Prompt OS Lint ==="
+
+if [ ! -x "$LINT_SCRIPT" ]; then
+  echo "[FAIL] Lint script not found or not executable: scripts/lint_prompts.sh"
+  exit 1
+fi
+
+if ! "$LINT_SCRIPT"; then
+  echo ""
+  echo "[FAIL] Prompt lint failed — commit blocked."
+  echo "Fix the issues above and try again."
+  exit 1
+fi
+
+echo "[PASS] Pre-commit lint passed."

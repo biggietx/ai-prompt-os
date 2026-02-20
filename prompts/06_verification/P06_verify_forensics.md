@@ -3,9 +3,9 @@ prompt_id: P06
 name: Verify Forensics
 phase: "06"
 maps_to_gate: "06"
-version: 0.2.0
+version: 0.3.0
 owner: ServiceMark.ai
-last_updated_utc: "2026-02-19T12:00:00Z"
+last_updated_utc: "2026-02-19T18:00:00Z"
 inputs_required:
   - "Active context lock (P00)"
   - "Approved scope declaration (P01)"
