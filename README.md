@@ -48,6 +48,27 @@ This repository follows [Semantic Versioning](https://semver.org/):
 4. Prompts must remain **vendor-neutral** — no platform-specific syntax in core prompts.
 5. No secrets, credentials, or absolute paths in any file.
 
+## Orchestrator Integration
+
+PromptOS is the instruction layer for the ServiceMark.ai AI Orchestrator Constitution pipeline. Session artifacts (`prompt_session.json`) attach to governed runs as evidence.
+
+**Quick start:**
+
+```bash
+# Run a governed session
+./bin/promptos dev \
+  --prompts "P00,P01,P03,P05,P06,P07" \
+  --developer "your-name" \
+  --target-repo "your-repo" \
+  --notes "session description"
+
+# Export session artifact to orchestrator evidence directory
+./session/export_session_artifact.sh \
+  --artifacts-dir "./artifacts/evidence/"
+```
+
+See [integration/AI_ORCHESTRATOR_INTEGRATION.md](integration/AI_ORCHESTRATOR_INTEGRATION.md) for the full integration contract.
+
 ## Repo Contract
 
 Prompts in this repository are **governed artifacts**. They follow the same discipline as production code:

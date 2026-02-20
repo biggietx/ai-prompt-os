@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-02-20
+
+### Added
+
+- **bin/promptos**: One-command CLI wrapper with subcommands: `version`, `lint`, `ci`, `hooks install`, and `dev` (governed session workflow).
+- **session/export_session_artifact.sh**: Exports session JSON into an orchestrator artifacts directory for governed run integration.
+- **integration/AI_ORCHESTRATOR_INTEGRATION.md**: Integration contract documenting how PromptOS feeds the AI Orchestrator Constitution pipeline.
+- **ADR-004**: Documents PromptOS-to-Orchestrator integration, one-command wrapper rationale, and audit trail design.
+
+### Changed
+
+- All prompt files updated to version 0.4.0 with current timestamps.
+- **README.md**: Added Orchestrator Integration section.
+
 ## [0.3.0] - 2026-02-19
 
 ### Added

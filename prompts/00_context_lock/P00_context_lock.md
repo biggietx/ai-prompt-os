@@ -3,9 +3,9 @@ prompt_id: P00
 name: Context Lock
 phase: "00"
 maps_to_gate: "00"
-version: 0.3.0
+version: 0.4.0
 owner: ServiceMark.ai
-last_updated_utc: "2026-02-19T18:00:00Z"
+last_updated_utc: "2026-02-20T00:00:00Z"
 inputs_required:
   - "Project name and one-line description"
   - "Technology stack and constraints"

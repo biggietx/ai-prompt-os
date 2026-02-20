@@ -1,0 +1,196 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+cmd_version() {
+  local ver
+  ver=$(git -C "$REPO_ROOT" describe --tags --abbrev=0 2>/dev/null || echo "")
+  if [ -z "$ver" ]; then
+    echo "UNRELEASED"
+  else
+    echo "$ver"
+  fi
+}
+
+cmd_lint() {
+  exec "$REPO_ROOT/scripts/lint_prompts.sh"
+}
+
+cmd_ci() {
+  exec "$REPO_ROOT/scripts/ci_check.sh"
+}
+
+cmd_hooks() {
+  if [ "${1:-}" = "install" ]; then
+    exec "$REPO_ROOT/scripts/install_hooks.sh"
+  else
+    echo "Usage: promptos hooks install"
+    exit 1
+  fi
+}
+
+cmd_dev() {
+  local PROMPTS=""
+  local DEVELOPER=""
+  local TARGET_REPO=""
+  local NOTES=""
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --prompts)
+        PROMPTS="$2"
+        shift 2
+        ;;
+      --developer)
+        DEVELOPER="$2"
+        shift 2
+        ;;
+      --target-repo)
+        TARGET_REPO="$2"
+        shift 2
+        ;;
+      --notes)
+        NOTES="$2"
+        shift 2
+        ;;
+      *)
+        echo "[FAIL] Unknown argument: $1"
+        echo "Usage: promptos dev --prompts \"P00,P01,...\" --developer \"name\" --target-repo \"repo\" [--notes \"text\"]"
+        exit 1
+        ;;
+    esac
+  done
+
+  if [ -z "$PROMPTS" ] || [ -z "$DEVELOPER" ] || [ -z "$TARGET_REPO" ]; then
+    echo "[FAIL] Missing required arguments."
+    echo "Usage: promptos dev --prompts \"P00,P01,...\" --developer \"name\" --target-repo \"repo\" [--notes \"text\"]"
+    exit 1
+  fi
+
+  local VERSION
+  VERSION=$(cmd_version)
+
+  echo "=== PromptOS Governed Session ==="
+  echo "Version: $VERSION"
+  echo ""
+
+  # Step 1: Lint
+  echo "--- Step 1: Lint ---"
+  if ! "$REPO_ROOT/scripts/lint_prompts.sh"; then
+    echo ""
+    echo "[FAIL] Lint failed — session aborted."
+    exit 1
+  fi
+  echo ""
+
+  # Step 2: Validate prompts exist in registry
+  echo "--- Step 2: Registry Validation ---"
+  local REGISTRY="$REPO_ROOT/prompts.index.json"
+  if [ ! -f "$REGISTRY" ]; then
+    echo "[FAIL] Registry not found: prompts.index.json"
+    exit 1
+  fi
+
+  IFS=',' read -r -a PROMPT_ARRAY <<< "$PROMPTS"
+  for pid in "${PROMPT_ARRAY[@]}"; do
+    pid=$(echo "$pid" | tr -d ' ')
+    if grep -q "\"prompt_id\": \"$pid\"" "$REGISTRY"; then
+      echo "[PASS] $pid found in registry"
+    else
+      echo "[FAIL] $pid not found in registry"
+      exit 1
+    fi
+  done
+  echo ""
+
+  # Step 3: Record session
+  echo "--- Step 3: Session Recording ---"
+  local RECORD_ARGS="--prompts \"$PROMPTS\" --developer \"$DEVELOPER\" --target-repo \"$TARGET_REPO\""
+  if [ -n "$NOTES" ]; then
+    RECORD_ARGS="$RECORD_ARGS --notes \"$NOTES\""
+  fi
+
+  local RECORD_OUTPUT
+  if [ -n "$NOTES" ]; then
+    RECORD_OUTPUT=$("$REPO_ROOT/session/record_session.sh" \
+      --prompts "$PROMPTS" \
+      --developer "$DEVELOPER" \
+      --target-repo "$TARGET_REPO" \
+      --notes "$NOTES" 2>&1)
+  else
+    RECORD_OUTPUT=$("$REPO_ROOT/session/record_session.sh" \
+      --prompts "$PROMPTS" \
+      --developer "$DEVELOPER" \
+      --target-repo "$TARGET_REPO" 2>&1)
+  fi
+
+  local RECORD_EXIT=$?
+  echo "$RECORD_OUTPUT"
+
+  if [ $RECORD_EXIT -ne 0 ]; then
+    echo ""
+    echo "[FAIL] Session recording failed — aborting."
+    exit 1
+  fi
+
+  # Extract session file path from output
+  local SESSION_FILE
+  SESSION_FILE=$(echo "$RECORD_OUTPUT" | grep "Session recorded:" | sed 's/.*Session recorded: //')
+
+  echo ""
+  echo "==========================================="
+  echo "  AUDIT SNIPPET — Paste in PR Description  "
+  echo "==========================================="
+  echo ""
+  echo "> **Governed Session**"
+  echo "> - PromptOS Version: \`$VERSION\`"
+  echo "> - Prompts Used: \`$PROMPTS\`"
+  echo "> - Session Artifact: \`$SESSION_FILE\`"
+  echo "> - Developer: \`$DEVELOPER\`"
+  echo "> - Target Repo: \`$TARGET_REPO\`"
+  echo ""
+  echo "[PASS] Governed session complete."
+}
+
+# Main dispatch
+case "${1:-}" in
+  version)
+    cmd_version
+    ;;
+  lint)
+    shift
+    cmd_lint
+    ;;
+  ci)
+    shift
+    cmd_ci
+    ;;
+  hooks)
+    shift
+    cmd_hooks "$@"
+    ;;
+  dev)
+    shift
+    cmd_dev "$@"
+    ;;
+  *)
+    echo "PromptOS CLI — governed prompt management"
+    echo ""
+    echo "Usage: promptos <command> [options]"
+    echo ""
+    echo "Commands:"
+    echo "  version                Show current PromptOS version"
+    echo "  lint                   Run prompt linter"
+    echo "  ci                     Run CI checks"
+    echo "  hooks install          Install git pre-commit hook"
+    echo "  dev [options]          Run a governed dev session"
+    echo ""
+    echo "Dev options:"
+    echo "  --prompts \"P00,P01\"    Prompt IDs used (required)"
+    echo "  --developer \"name\"     Developer name (required)"
+    echo "  --target-repo \"repo\"   Target repository (required)"
+    echo "  --notes \"text\"         Session notes (optional)"
+    exit 1
+    ;;
+esac
