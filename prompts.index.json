@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "prompt_os_version": "0.2.0",
+  "last_updated_utc": "2026-02-19T12:00:00Z",
+  "prompts": [
+    {
+      "prompt_id": "P00",
+      "name": "Context Lock",
+      "version": "0.2.0",
+      "phase": "00",
+      "maps_to_gate": "00",
+      "path": "prompts/00_context_lock/P00_context_lock.md",
+      "owner": "ServiceMark.ai",
+      "last_updated_utc": "2026-02-19T12:00:00Z"
+    },
+    {
+      "prompt_id": "P01",
+      "name": "Scope Declaration",
+      "version": "0.2.0",
+      "phase": "01",
+      "maps_to_gate": "01",
+      "path": "prompts/01_scope/P01_scope_declaration.md",
+      "owner": "ServiceMark.ai",
+      "last_updated_utc": "2026-02-19T12:00:00Z"
+    },
+    {
+      "prompt_id": "P03",
+      "name": "Design Gate",
+      "version": "0.2.0",
+      "phase": "03",
+      "maps_to_gate": "03",
+      "path": "prompts/03_design/P03_design_gate.md",
+      "owner": "ServiceMark.ai",
+      "last_updated_utc": "2026-02-19T12:00:00Z"
+    },
+    {
+      "prompt_id": "P05",
+      "name": "Constrained Builder",
+      "version": "0.2.0",
+      "phase": "05",
+      "maps_to_gate": "05",
+      "path": "prompts/05_implementation/P05_constrained_builder.md",
+      "owner": "ServiceMark.ai",
+      "last_updated_utc": "2026-02-19T12:00:00Z"
+    },
+    {
+      "prompt_id": "P06",
+      "name": "Verify Forensics",
+      "version": "0.2.0",
+      "phase": "06",
+      "maps_to_gate": "06",
+      "path": "prompts/06_verification/P06_verify_forensics.md",
+      "owner": "ServiceMark.ai",
+      "last_updated_utc": "2026-02-19T12:00:00Z"
+    },
+    {
+      "prompt_id": "P07",
+      "name": "Adversarial Review",
+      "version": "0.2.0",
+      "phase": "07",
+      "maps_to_gate": "07",
+      "path": "prompts/07_review/P07_adversarial_review.md",
+      "owner": "ServiceMark.ai",
+      "last_updated_utc": "2026-02-19T12:00:00Z"
+    },
+    {
+      "prompt_id": "P08",
+      "name": "Governance Escalation",
+      "version": "0.2.0",
+      "phase": "08",
+      "maps_to_gate": "08",
+      "path": "prompts/08_governance/P08_governance_escalation.md",
+      "owner": "ServiceMark.ai",
+      "last_updated_utc": "2026-02-19T12:00:00Z"
+    }
+  ]
+}

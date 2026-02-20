@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-02-19
+
+### Added
+
+- **prompts.index.json**: Machine-readable prompt registry at repo root.
+- **scripts/lint_prompts.sh**: Lint script validating YAML headers, required keys, secret patterns, and absolute paths.
+- **playbooks/01_governed_session.md**: 10-minute governed dev session checklist with PR requirements.
+- **ADR-002**: Documents prompt registry and lint enforcement decisions.
+
+### Changed
+
+- All prompt files updated to version 0.2.0 with current timestamps.
+- **README.md**: Added Repo Contract, Automation, and Version Pinning sections.
+
 ## [0.1.0] - 2026-02-19
 
 ### Added
