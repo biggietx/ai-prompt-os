@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.5.0] - 2026-02-20
+
+### Added
+
+- **scripts/validate_prompt_artifact.sh**: Validates `prompt_session.json` artifacts against the session schema using jq. Blocks approval if artifact is missing or invalid.
+- **integration/ENFORCEMENT_GATE_SNIPPET.md**: Ready-to-use bash snippet for enforcing PromptOS governance in Orchestrator Gate 06 or CI pipelines.
+- **ADR-005**: Documents prompt artifact enforcement rationale and integration with separation of duties.
+
+### Changed
+
+- **scripts/ci_check.sh**: Added Step 4 — optional prompt artifact enforcement via `PROMPTOS_ARTIFACTS_DIR` environment variable.
+- All prompt files updated to version 0.5.0 with current timestamps.
+
 ## [0.4.0] - 2026-02-20
 
 ### Added

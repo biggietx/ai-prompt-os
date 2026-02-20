@@ -66,6 +66,26 @@ else
   FAIL_COUNT=$((FAIL_COUNT + 1))
 fi
 
+# Step 4: Prompt Artifact Enforcement (optional)
+echo "--- Step 4: Prompt Artifact Enforcement ---"
+if [ -n "${PROMPTOS_ARTIFACTS_DIR:-}" ]; then
+  VALIDATE_SCRIPT="$REPO_ROOT/scripts/validate_prompt_artifact.sh"
+  if [ -x "$VALIDATE_SCRIPT" ]; then
+    if "$VALIDATE_SCRIPT" --artifacts-dir "$PROMPTOS_ARTIFACTS_DIR"; then
+      echo ""
+    else
+      echo ""
+      FAIL_COUNT=$((FAIL_COUNT + 1))
+    fi
+  else
+    echo "[FAIL] validate_prompt_artifact.sh not found or not executable"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+  fi
+else
+  echo "[INFO] Skipping artifact validation (PROMPTOS_ARTIFACTS_DIR not set)"
+fi
+echo ""
+
 # Summary
 echo ""
 echo "=== CI Check Summary ==="

@@ -3,9 +3,9 @@ prompt_id: P05
 name: Constrained Builder
 phase: "05"
 maps_to_gate: "05"
-version: 0.4.0
+version: 0.5.0
 owner: ServiceMark.ai
-last_updated_utc: "2026-02-20T00:00:00Z"
+last_updated_utc: "2026-02-20T06:00:00Z"
 inputs_required:
   - "Active context lock (P00)"
   - "Approved scope declaration (P01)"
