@@ -1,0 +1,13 @@
+# PromptOS CODEOWNERS — Separation of Duties
+# All changes require review. This enforces governance even for solo devs.
+
+# Default: all files require review
+* @biggietx
+
+# Governed artifacts — strict review required
+prompts/** @biggietx
+policy/** @biggietx
+scripts/** @biggietx
+integration/** @biggietx
+session/** @biggietx
+adr/** @biggietx

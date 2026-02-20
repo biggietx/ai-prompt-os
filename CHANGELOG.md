@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.9.0] - 2026-02-20
+
+### Added
+
+- **`.github/workflows/promptos_ci.yml`**: GitHub Actions CI — runs lint, CI checks, and version print on every PR and push to main.
+- **`.github/CODEOWNERS`**: Separation-of-duties enforcement via GitHub code ownership. All governed directories require `@biggietx` review.
+- **`CONTRIBUTING.md`**: Contribution rules documenting governed development workflow, ADR requirements, and PR process.
+- **`release/CHECKLIST.md`**: Step-by-step release checklist covering lint, CI, governed session, artifact validation, version bump, and tagging.
+- **ADR-009**: Documents GitHub enforcement strategy — CI, PR templates, CODEOWNERS, and ServiceMark differentiation.
+
+### Changed
+
+- **`.github/pull_request_template.md`**: Replaced with governance-focused checklist including PromptOS version, prompts used, artifact path, hash verification, and audit snippet.
+- All prompt files updated to version 0.9.0 with current timestamps.
+
 ## [0.8.0] - 2026-02-20
 
 ### Added

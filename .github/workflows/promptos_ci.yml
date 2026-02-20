@@ -1,0 +1,31 @@
+name: PromptOS CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate Prompts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Run prompt lint
+        run: ./scripts/lint_prompts.sh
+
+      - name: Run CI checks
+        run: ./scripts/ci_check.sh
+
+      - name: Print PromptOS version
+        run: ./bin/promptos version
