@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.0] - 2026-02-23
+
+### Added
+
+- **`.github/workflows/release.yml`**: Automated release workflow — runs lint + CI on tag push, creates GitHub Release with auto-generated notes.
+- **ADR-010**: Documents production readiness — branch protection, CI enforcement, objective discipline, and enterprise differentiation.
+
+### Changed
+
+- **Branch protection**: Enabled on `main` — requires PR, 1 review, passing status checks (PromptOS CI + Objective Compliance Check), blocks force push and deletion.
+- **PR #1 merged** (INFRA-V1-003): Objective governance scaffolding now on main.
+- **PR #2 closed**: Test enforcement PR cleaned up.
+
+### Governance Milestone
+
+**v1.0.0 marks governance infrastructure complete.** The full chain — from prompt structure through session recording, artifact hashing, chain binding, policy enforcement, CI validation, PR objective compliance, and branch protection — is now enforced at every level.
+
 ## [0.9.0] - 2026-02-20
 
 ### Added

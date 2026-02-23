@@ -15,13 +15,13 @@
 - STRATEGY.md exists and is updated.
 - Daily logs exist and are used.
 
-**Status:** In Progress
+**Status:** Done
 
 **Owner Agent:** Infrastructure-Agent
 
 **Links:** —
 
-**Latest Update (2026-02-20):** Governance scaffolding initialized.
+**Latest Update (2026-02-23):** PR #1 merged. Objective governance live on main.
 
 ---
 
@@ -39,6 +39,47 @@ Known limitations:
 
 Follow-ups:
 - Potential future validation of STRATEGY updates.
+
+---
+
+## INFRA-V1-004 — Production governance hardening + v1.0.0 release
+
+**Intent:** Convert repository from governance-enabled to production-grade governance-enforced. Enable branch protection, merge compliance PRs, cut v1.0.0.
+
+**Success Metric:**
+- Branch protection enabled on main.
+- Required status checks: PromptOS CI + Objective Compliance Check.
+- Required PR reviews before merge.
+- v1.0.0 tagged and released.
+
+**Status:** Done
+
+**Owner Agent:** Infrastructure-Agent
+
+**Links:** Tag `v1.0.0`
+
+**Latest Update (2026-02-23):** Production hardening complete. Branch protection enabled. v1.0.0 released.
+
+---
+
+### Handoff (2026-02-23)
+
+How to run/test:
+- Direct push to main → blocked by branch protection.
+- PR without objective ID → blocked by Objective Compliance Check.
+- PR with failing lint → blocked by PromptOS CI.
+- Tag push → triggers release workflow.
+
+Key decisions:
+- Branch protection enforces for admins (no bypass).
+- v1.0.0 marks governance infrastructure complete.
+
+Known limitations:
+- Solo developer must self-review PRs.
+- Emergency hotfixes still require PR process.
+
+Follow-ups:
+- None critical. Potential future: cryptographic signing, multi-session chaining.
 
 ---
 
