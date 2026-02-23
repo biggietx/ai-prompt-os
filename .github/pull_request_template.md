@@ -1,3 +1,20 @@
+> PR title must include Objective ID like [INFRA-V1-003] Short description
+
+### Objective
+- [ ] I mapped this PR to **OBJ-###**
+- [ ] I updated `LOGS/DAILY/YYYY-MM-DD.md`
+- [ ] I updated `STRATEGY.md` if status changed
+
+### Summary
+What changed:
+
+### Test plan
+How verified:
+
+### Risks / roll-back
+
+---
+
 ### Governance Checklist
 
 - [ ] PromptOS tag used: `vX.Y.Z`

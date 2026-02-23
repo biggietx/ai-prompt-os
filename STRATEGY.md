@@ -1,8 +1,44 @@
-# PromptOS Strategy — Objective Tree
+# Strategic Objectives
 
 > **Owner**: ServiceMark.ai
-> **Agent**: promptos-sculptor
 > **Last updated**: 2026-02-20
+
+---
+
+## INFRA-V1-003 — Objective governance + PR enforcement
+
+**Intent:** Introduce structured objective tracking, daily logs, and PR enforcement to ensure multi-agent clarity and compliance.
+
+**Success Metric:**
+- All PRs require Objective ID in title.
+- All PRs require mandatory reporting block.
+- STRATEGY.md exists and is updated.
+- Daily logs exist and are used.
+
+**Status:** In Progress
+
+**Owner Agent:** Infrastructure-Agent
+
+**Links:** —
+
+**Latest Update (2026-02-20):** Governance scaffolding initialized.
+
+---
+
+### Handoff (2026-02-20)
+
+How to run/test:
+- Open PR without Objective ID → CI must fail.
+- Open PR with valid ID + checklist → CI must pass.
+
+Key decisions:
+- Objective ID regex enforces DOMAIN-STAGE-### format.
+
+Known limitations:
+- Does not validate daily log contents, only PR structure.
+
+Follow-ups:
+- Potential future validation of STRATEGY updates.
 
 ---
 
