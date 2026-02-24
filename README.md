@@ -4,6 +4,15 @@ A governed prompt repository for AI-assisted software development. Prompts are t
 
 Maintained by [ServiceMark.ai](https://servicemark.ai) for personal use.
 
+## First Governed Run (2 minutes)
+
+```bash
+cd examples/first-governed-run
+./run.sh
+```
+
+This runs a complete governed session, exports the artifact, validates it, and checks drift lock — all in one command. See [examples/first-governed-run/README.md](examples/first-governed-run/README.md) for details.
+
 ## What This Is
 
 A structured set of prompts that enforce discipline in AI-assisted development workflows. Each prompt maps to a gate in a linear process: lock context, declare scope, design, implement, verify, review, and escalate when uncertain.

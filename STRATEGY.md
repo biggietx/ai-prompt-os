@@ -1,7 +1,7 @@
 # Strategic Objectives
 
 > **Owner**: ServiceMark.ai
-> **Last updated**: 2026-02-20
+> **Last updated**: 2026-02-23
 
 ---
 
@@ -80,6 +80,45 @@ Known limitations:
 
 Follow-ups:
 - None critical. Potential future: cryptographic signing, multi-session chaining.
+
+---
+
+## CORE-EXP-001 — First governed run example
+
+**Intent:** Make PromptOS immediately usable by any developer with a one-command example that executes, exports, and validates prompt artifacts end-to-end.
+
+**Success Metric:**
+- `examples/first-governed-run/run.sh` executes successfully.
+- Artifact is exported, validated, and drift-locked in one command.
+- README links to the example for 2-minute onboarding.
+- CI guard prevents the example from rotting.
+
+**Status:** In Progress
+
+**Owner Agent:** Core-Agent
+
+**Links:** —
+
+**Latest Update (2026-02-23):** Example scaffolding created. run.sh, README, CI guard added.
+
+---
+
+### Handoff (2026-02-23)
+
+How to run/test:
+- `cd examples/first-governed-run && ./run.sh` → must print `[PASS] first governed run complete`.
+- CI validates script exists, is executable, and references real repo commands.
+
+Key decisions:
+- Uses lightweight CI guard (existence + executable + reference checks) to avoid side effects in CI.
+- Artifacts gitignored to keep repo clean.
+
+Known limitations:
+- Requires `jq` installed locally for full validation.
+- Session logs are ephemeral (gitignored).
+
+Follow-ups:
+- Potential future: expected output comparison, additional prompt combinations.
 
 ---
 
