@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PAS Module",
+  "description": "Schema for a Prompt Architecture System module.",
+  "type": "object",
+  "required": ["id", "type", "category", "dewey", "version", "status", "tags", "content"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique module identifier.",
+      "minLength": 1
+    },
+    "type": {
+      "type": "string",
+      "const": "module",
+      "description": "Must be 'module'."
+    },
+    "category": {
+      "type": "string",
+      "description": "Module category name.",
+      "minLength": 1
+    },
+    "dewey": {
+      "type": "string",
+      "description": "Dewey-decimal classification code (e.g., '000', '100.10').",
+      "pattern": "^\\d{3}(\\.\\d+)*$"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this module.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "approved"],
+      "description": "Module lifecycle status."
+    },
+    "tags": {
+      "type": "array",
+      "description": "Searchable tags for this module.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "content": {
+      "type": "string",
+      "description": "The prompt content of this module.",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}

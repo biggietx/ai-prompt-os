@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PAS Stack",
+  "description": "Schema for a Prompt Architecture System stack.",
+  "type": "object",
+  "required": ["id", "type", "version", "status", "includes"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique stack identifier.",
+      "minLength": 1
+    },
+    "type": {
+      "type": "string",
+      "const": "stack",
+      "description": "Must be 'stack'."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this stack.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "approved"],
+      "description": "Stack lifecycle status."
+    },
+    "includes": {
+      "type": "array",
+      "description": "Ordered list of module IDs included in this stack.",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "inherits": {
+      "type": "array",
+      "description": "Optional list of stack IDs this stack inherits from.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "overrides": {
+      "type": "array",
+      "description": "Optional list of module IDs whose content is overridden.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}
