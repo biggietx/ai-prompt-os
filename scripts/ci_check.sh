@@ -86,6 +86,33 @@ else
 fi
 echo ""
 
+# Step 5: Example script guard
+echo "--- Step 5: Example Script Guard ---"
+EXAMPLE_SCRIPT="$REPO_ROOT/examples/first-governed-run/run.sh"
+if [ ! -f "$EXAMPLE_SCRIPT" ]; then
+  echo "[FAIL] Example script missing: examples/first-governed-run/run.sh"
+  FAIL_COUNT=$((FAIL_COUNT + 1))
+elif [ ! -x "$EXAMPLE_SCRIPT" ]; then
+  echo "[FAIL] Example script not executable: examples/first-governed-run/run.sh"
+  FAIL_COUNT=$((FAIL_COUNT + 1))
+else
+  echo "[PASS] Example script exists and is executable"
+  # Verify it references real repo commands
+  MISSING_REF=0
+  for ref in "bin/promptos" "session/export_session_artifact.sh" "scripts/validate_prompt_artifact.sh" "integration/drift_lock_check.sh"; do
+    if grep -q "$ref" "$EXAMPLE_SCRIPT"; then
+      echo "[PASS] References: $ref"
+    else
+      echo "[FAIL] Missing reference to: $ref"
+      MISSING_REF=1
+    fi
+  done
+  if [ $MISSING_REF -ne 0 ]; then
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+  fi
+fi
+echo ""
+
 # Summary
 echo ""
 echo "=== CI Check Summary ==="

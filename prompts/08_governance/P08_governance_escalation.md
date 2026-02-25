@@ -3,9 +3,9 @@ prompt_id: P08
 name: Governance Escalation
 phase: "08"
 maps_to_gate: "08"
-version: 0.9.0
+version: 1.0.0
 owner: ServiceMark.ai
-last_updated_utc: "2026-02-21T06:00:00Z"
+last_updated_utc: "2026-02-25T00:00:00Z"
 inputs_required:
   - "Active context lock (P00)"
   - "The specific issue or uncertainty triggering escalation"
