@@ -24,6 +24,9 @@ jobs:
       - name: Run prompt lint
         run: ./scripts/lint_prompts.sh
 
+      - name: Version Consistency Check
+        run: ./scripts/check_version_consistency.sh
+
       - name: Run CI checks
         run: ./scripts/ci_check.sh
 
