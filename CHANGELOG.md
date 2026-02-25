@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] - 2026-02-25
+
+### Fixed
+
+- **Version skew**: `policy/promptos_policy.json` `required_promptos_version` corrected from `v0.8.0` to `v1.0.0`. Registry and all prompt YAML headers updated from `0.9.0` to `1.0.0`. This defect caused `validate_prompt_artifact.sh` to reject all v1.0.0 session artifacts.
+
+### Added
+
+- **`scripts/check_version_consistency.sh`**: CI-enforced version consistency validation — checks policy, registry, and all prompt YAML headers against the latest git tag. Prevents version skew from recurring.
+- **CI workflow step**: "Version Consistency Check" added to `.github/workflows/promptos_ci.yml` between lint and CI checks.
+
 ## [1.0.0] - 2026-02-23
 
 ### Added

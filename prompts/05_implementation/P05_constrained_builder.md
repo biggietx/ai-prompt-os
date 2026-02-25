@@ -3,7 +3,7 @@ prompt_id: P05
 name: Constrained Builder
 phase: "05"
 maps_to_gate: "05"
-version: 1.0.0
+version: 1.0.1
 owner: ServiceMark.ai
 last_updated_utc: "2026-02-25T00:00:00Z"
 inputs_required:

@@ -3,7 +3,7 @@ prompt_id: P06
 name: Verify Forensics
 phase: "06"
 maps_to_gate: "06"
-version: 1.0.0
+version: 1.0.1
 owner: ServiceMark.ai
 last_updated_utc: "2026-02-25T00:00:00Z"
 inputs_required:
