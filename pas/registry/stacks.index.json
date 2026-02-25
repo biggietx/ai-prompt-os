@@ -1,1 +1,6 @@
-[]
+[
+  {
+    "id": "STACK-GLOBAL-BASE-001",
+    "path": "pas/stacks/global_base.json"
+  }
+]

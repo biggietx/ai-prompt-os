@@ -1,0 +1,14 @@
+{
+  "id": "STACK-GLOBAL-BASE-001",
+  "type": "stack",
+  "version": "1.0.0",
+  "status": "approved",
+  "includes": [
+    "core-safety-001",
+    "core-accuracy-002",
+    "cognitive-critical-eval-120",
+    "output-markdown-220",
+    "output-concise-bullets-240",
+    "code-security-310"
+  ]
+}
