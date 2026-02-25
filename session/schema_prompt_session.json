@@ -48,6 +48,36 @@
     "lint_passed": {
       "type": "boolean",
       "description": "Whether prompt lint passed before session recording."
+    },
+    "pas": {
+      "type": "object",
+      "description": "Optional PAS stack binding. Present only when session used a PAS stack.",
+      "required": ["stack_id", "stack_version", "compiled_hash"],
+      "properties": {
+        "stack_id": {
+          "type": "string",
+          "description": "PAS stack ID that was compiled.",
+          "minLength": 1
+        },
+        "stack_version": {
+          "type": "string",
+          "description": "Version of the PAS stack at compile time."
+        },
+        "compiled_hash": {
+          "type": "string",
+          "description": "SHA-256 hash of the compiled prompt output.",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "artifact_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the base session JSON (before chain fields)."
+    },
+    "chain_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of artifact_hash concatenated with timestamp_utc."
     }
   },
   "additionalProperties": false

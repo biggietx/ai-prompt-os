@@ -52,6 +52,141 @@ cmd_pas() {
   esac
 }
 
+cmd_run() {
+  local PROMPTS=""
+  local DEVELOPER=""
+  local TARGET_REPO=""
+  local NOTES=""
+  local PAS_STACK=""
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --prompts)
+        PROMPTS="$2"
+        shift 2
+        ;;
+      --developer)
+        DEVELOPER="$2"
+        shift 2
+        ;;
+      --target-repo)
+        TARGET_REPO="$2"
+        shift 2
+        ;;
+      --notes)
+        NOTES="$2"
+        shift 2
+        ;;
+      --pas-stack)
+        PAS_STACK="$2"
+        shift 2
+        ;;
+      *)
+        echo "[FAIL] Unknown argument: $1"
+        echo "Usage: promptos run --pas-stack \"STACK-ID\" --prompts \"P00,P01,...\" --developer \"name\" --target-repo \"repo\" [--notes \"text\"]"
+        exit 1
+        ;;
+    esac
+  done
+
+  if [ -z "$PAS_STACK" ] || [ -z "$PROMPTS" ] || [ -z "$DEVELOPER" ] || [ -z "$TARGET_REPO" ]; then
+    echo "[FAIL] Missing required arguments."
+    echo "Usage: promptos run --pas-stack \"STACK-ID\" --prompts \"P00,P01,...\" --developer \"name\" --target-repo \"repo\" [--notes \"text\"]"
+    exit 1
+  fi
+
+  local VERSION
+  VERSION=$(cmd_version)
+
+  echo "=== PromptOS Governed Run (PAS-bound) ==="
+  echo "Version: $VERSION"
+  echo "PAS Stack: $PAS_STACK"
+  echo ""
+
+  # Step 1: Lint
+  echo "--- Step 1: Lint ---"
+  if ! "$REPO_ROOT/scripts/lint_prompts.sh"; then
+    echo ""
+    echo "[FAIL] Lint failed — run aborted."
+    exit 1
+  fi
+  echo ""
+
+  # Step 2: PAS Lint
+  echo "--- Step 2: PAS Lint ---"
+  if ! "$REPO_ROOT/scripts/lint_pas.sh"; then
+    echo ""
+    echo "[FAIL] PAS lint failed — run aborted."
+    exit 1
+  fi
+  echo ""
+
+  # Step 3: Registry Validation
+  echo "--- Step 3: Registry Validation ---"
+  local REGISTRY="$REPO_ROOT/prompts.index.json"
+  if [ ! -f "$REGISTRY" ]; then
+    echo "[FAIL] Registry not found: prompts.index.json"
+    exit 1
+  fi
+
+  IFS=',' read -r -a PROMPT_ARRAY <<< "$PROMPTS"
+  for pid in "${PROMPT_ARRAY[@]}"; do
+    pid=$(echo "$pid" | tr -d ' ')
+    if grep -q "\"prompt_id\": \"$pid\"" "$REGISTRY"; then
+      echo "[PASS] $pid found in registry"
+    else
+      echo "[FAIL] $pid not found in registry"
+      exit 1
+    fi
+  done
+  echo ""
+
+  # Step 4: Record session with PAS binding
+  echo "--- Step 4: Session Recording (PAS-bound) ---"
+  local RECORD_OUTPUT
+  if [ -n "$NOTES" ]; then
+    RECORD_OUTPUT=$("$REPO_ROOT/session/record_session.sh" \
+      --prompts "$PROMPTS" \
+      --developer "$DEVELOPER" \
+      --target-repo "$TARGET_REPO" \
+      --notes "$NOTES" \
+      --pas-stack "$PAS_STACK" 2>&1)
+  else
+    RECORD_OUTPUT=$("$REPO_ROOT/session/record_session.sh" \
+      --prompts "$PROMPTS" \
+      --developer "$DEVELOPER" \
+      --target-repo "$TARGET_REPO" \
+      --pas-stack "$PAS_STACK" 2>&1)
+  fi
+
+  local RECORD_EXIT=$?
+  echo "$RECORD_OUTPUT"
+
+  if [ $RECORD_EXIT -ne 0 ]; then
+    echo ""
+    echo "[FAIL] Session recording failed — aborting."
+    exit 1
+  fi
+
+  local SESSION_FILE
+  SESSION_FILE=$(echo "$RECORD_OUTPUT" | grep "Session recorded:" | sed 's/.*Session recorded: //')
+
+  echo ""
+  echo "==========================================="
+  echo "  AUDIT SNIPPET — Paste in PR Description  "
+  echo "==========================================="
+  echo ""
+  echo "> **Governed Run (PAS-bound)**"
+  echo "> - PromptOS Version: \`$VERSION\`"
+  echo "> - PAS Stack: \`$PAS_STACK\`"
+  echo "> - Prompts Used: \`$PROMPTS\`"
+  echo "> - Session Artifact: \`$SESSION_FILE\`"
+  echo "> - Developer: \`$DEVELOPER\`"
+  echo "> - Target Repo: \`$TARGET_REPO\`"
+  echo ""
+  echo "[PASS] Governed run complete (PAS-bound)."
+}
+
 cmd_dev() {
   local PROMPTS=""
   local DEVELOPER=""
@@ -192,6 +327,10 @@ case "${1:-}" in
     shift
     cmd_hooks "$@"
     ;;
+  run)
+    shift
+    cmd_run "$@"
+    ;;
   dev)
     shift
     cmd_dev "$@"
@@ -211,10 +350,18 @@ case "${1:-}" in
     echo "  ci                     Run CI checks"
     echo "  hooks install          Install git pre-commit hook"
     echo "  dev [options]          Run a governed dev session"
+    echo "  run [options]          Run a governed session with PAS binding"
     echo "  pas compile [options]  Compile a PAS stack"
     echo "  pas lint               Validate PAS modules and stacks"
     echo ""
     echo "Dev options:"
+    echo "  --prompts \"P00,P01\"    Prompt IDs used (required)"
+    echo "  --developer \"name\"     Developer name (required)"
+    echo "  --target-repo \"repo\"   Target repository (required)"
+    echo "  --notes \"text\"         Session notes (optional)"
+    echo ""
+    echo "Run options (PAS-bound):"
+    echo "  --pas-stack \"STACK-ID\" PAS stack to bind (required)"
     echo "  --prompts \"P00,P01\"    Prompt IDs used (required)"
     echo "  --developer \"name\"     Developer name (required)"
     echo "  --target-repo \"repo\"   Target repository (required)"

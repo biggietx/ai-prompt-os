@@ -89,6 +89,21 @@ if [ -f "$HASH_SOURCE" ]; then
   echo "  Hash:        $HASH_DEST"
 fi
 
+# Copy PAS compiled file if session has pas block
+if command -v jq > /dev/null 2>&1 && jq -e '.pas.compiled_hash' "$SESSION_FILE" > /dev/null 2>&1; then
+  # Find matching compiled file by session ID
+  SESSION_BASENAME=$(basename "$SESSION_FILE" .json)
+  SESSION_ID="${SESSION_BASENAME#session-}"
+  PAS_SOURCE="$(cd "$(dirname "$0")" && pwd)/pas/${SESSION_ID}-compiled.txt"
+  if [ -f "$PAS_SOURCE" ]; then
+    PAS_DEST="$ARTIFACTS_DIR/pas_compiled.txt"
+    cp "$PAS_SOURCE" "$PAS_DEST"
+    echo "  PAS compiled: $PAS_DEST"
+  else
+    echo "  [WARN] PAS compiled file not found: $PAS_SOURCE"
+  fi
+fi
+
 echo "[PASS] Session artifact exported."
 echo "  Source: $SESSION_FILE"
 echo "  Destination: $DEST"

@@ -164,6 +164,42 @@ else
   fi
 fi
 
+# PAS compiled hash verification (if pas block exists)
+if jq -e '.pas' "$ARTIFACT" > /dev/null 2>&1; then
+  echo ""
+  echo "--- PAS Artifact Validation ---"
+  PAS_COMPILED="$ARTIFACTS_DIR/pas_compiled.txt"
+  STORED_PAS_HASH=$(jq -r '.pas.compiled_hash // ""' "$ARTIFACT")
+
+  if [ -z "$STORED_PAS_HASH" ]; then
+    echo "  [FAIL] pas block present but compiled_hash is missing."
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+  elif [ ! -f "$PAS_COMPILED" ]; then
+    echo "  [FAIL] pas block present but pas_compiled.txt not found in artifacts."
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+  else
+    COMPUTED_PAS_HASH=$(shasum -a 256 "$PAS_COMPILED" | cut -d ' ' -f 1)
+    if [ "$STORED_PAS_HASH" = "$COMPUTED_PAS_HASH" ]; then
+      echo "  [PASS] PAS compiled hash verified."
+    else
+      echo "  [FAIL] PAS compiled hash mismatch. Possible tampering."
+      echo "    Expected: $STORED_PAS_HASH"
+      echo "    Actual:   $COMPUTED_PAS_HASH"
+      FAIL_COUNT=$((FAIL_COUNT + 1))
+    fi
+  fi
+
+  # Validate required pas sub-fields
+  for pfield in stack_id stack_version compiled_hash; do
+    if jq -e ".pas.${pfield}" "$ARTIFACT" > /dev/null 2>&1; then
+      echo "  [PASS] pas.$pfield present"
+    else
+      echo "  [FAIL] pas.$pfield missing"
+      FAIL_COUNT=$((FAIL_COUNT + 1))
+    fi
+  done
+fi
+
 echo ""
 if [ $FAIL_COUNT -eq 0 ]; then
   echo "[PASS] prompt_session.json validated."
