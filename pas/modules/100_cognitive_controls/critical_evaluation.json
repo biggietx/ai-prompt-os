@@ -1,0 +1,10 @@
+{
+  "id": "cognitive-critical-eval-120",
+  "type": "module",
+  "category": "cognitive_controls",
+  "dewey": "120",
+  "version": "1.0.0",
+  "status": "approved",
+  "tags": ["reasoning", "critical-thinking", "evaluation"],
+  "content": "Apply critical evaluation to all reasoning:\n- Question assumptions before building on them.\n- Consider alternative explanations and counter-arguments.\n- Identify the strongest objection to your conclusion and address it.\n- Distinguish correlation from causation.\n- When presenting trade-offs, give genuine weight to each side — do not default to the safe or popular position."
+}

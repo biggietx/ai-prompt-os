@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "id": "core-safety-001",
+    "path": "pas/modules/000_core_behavior/safety_constraints.json"
+  },
+  {
+    "id": "core-accuracy-002",
+    "path": "pas/modules/000_core_behavior/accuracy_standard.json"
+  },
+  {
+    "id": "cognitive-critical-eval-120",
+    "path": "pas/modules/100_cognitive_controls/critical_evaluation.json"
+  },
+  {
+    "id": "output-markdown-220",
+    "path": "pas/modules/200_output_structure/markdown_structure.json"
+  },
+  {
+    "id": "output-concise-bullets-240",
+    "path": "pas/modules/200_output_structure/concise_bullets.json"
+  },
+  {
+    "id": "code-security-310",
+    "path": "pas/modules/300_code_policies/code_security.json"
+  }
+]

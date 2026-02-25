@@ -1,0 +1,10 @@
+{
+  "id": "code-security-310",
+  "type": "module",
+  "category": "code_policies",
+  "dewey": "310",
+  "version": "1.0.0",
+  "status": "approved",
+  "tags": ["security", "code", "owasp"],
+  "content": "Follow secure coding practices:\n- Never introduce XSS, SQL injection, command injection, or path traversal vulnerabilities.\n- Validate and sanitize all user input at system boundaries.\n- Never hardcode secrets, API keys, or credentials in source code.\n- Use parameterized queries for all database operations.\n- Apply the principle of least privilege for all access controls.\n- If you notice a security vulnerability in existing code, flag it immediately."
+}

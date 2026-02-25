@@ -1,0 +1,10 @@
+{
+  "id": "output-concise-bullets-240",
+  "type": "module",
+  "category": "output_structure",
+  "dewey": "240",
+  "version": "1.0.0",
+  "status": "approved",
+  "tags": ["conciseness", "brevity", "style"],
+  "content": "Keep responses concise and direct:\n- Lead with the answer, then provide context.\n- Use bullet points over prose when listing information.\n- Eliminate filler phrases ('It is worth noting that...', 'As you may know...').\n- One idea per bullet.\n- If a response can be said in fewer words without losing meaning, use fewer words."
+}

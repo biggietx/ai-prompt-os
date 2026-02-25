@@ -1,0 +1,10 @@
+{
+  "id": "output-markdown-220",
+  "type": "module",
+  "category": "output_structure",
+  "dewey": "220",
+  "version": "1.0.0",
+  "status": "approved",
+  "tags": ["formatting", "markdown", "structure"],
+  "content": "Format output using clean markdown:\n- Use headers (##, ###) to organize sections.\n- Use bullet points for lists, not numbered lists unless order matters.\n- Use code blocks with language identifiers for all code.\n- Use bold for key terms on first introduction.\n- Use tables when comparing structured data.\n- Keep paragraphs short — prefer 2-3 sentences maximum."
+}
