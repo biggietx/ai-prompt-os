@@ -5,98 +5,161 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 POLICY="$REPO_ROOT/policy/promptos_policy.json"
 REGISTRY="$REPO_ROOT/prompts.index.json"
 PROMPTS_DIR="$REPO_ROOT/prompts"
-FAIL_COUNT=0
 
 echo "=== Version Consistency Check ==="
 echo ""
 
-# A. Get latest git tag
+# --- Helpers ---
+
+# Parse "major.minor.patch" from a version string, stripping optional leading "v"
+parse_semver() {
+  local ver="${1#v}"
+  local major minor patch
+  major=$(echo "$ver" | cut -d. -f1)
+  minor=$(echo "$ver" | cut -d. -f2)
+  patch=$(echo "$ver" | cut -d. -f3)
+  echo "$major $minor $patch"
+}
+
+# Compute the next valid patch version from a semver string
+next_patch() {
+  local major minor patch
+  read -r major minor patch <<< "$(parse_semver "$1")"
+  echo "$major.$minor.$((patch + 1))"
+}
+
+# --- A. Get latest git tag ---
+
 LATEST_TAG=$(git -C "$REPO_ROOT" describe --tags --abbrev=0 2>/dev/null || echo "")
 if [ -z "$LATEST_TAG" ]; then
   echo "[FAIL] No git tag found. Cannot verify version consistency."
   exit 1
 fi
 
-# B. Strip leading "v" for numeric comparison
-NUMERIC_VERSION="${LATEST_TAG#v}"
+TAG_NUMERIC="${LATEST_TAG#v}"
+NEXT_PATCH=$(next_patch "$TAG_NUMERIC")
 
-echo "Git tag:         $LATEST_TAG"
-echo "Numeric version: $NUMERIC_VERSION"
+echo "Git tag:            $LATEST_TAG"
+echo "Tag numeric:        $TAG_NUMERIC"
+echo "Next valid patch:   $NEXT_PATCH"
 echo ""
 
-# C. Extract versions from each source
+# --- B. Extract versions from each source ---
 
-# Policy version
 if [ ! -f "$POLICY" ]; then
   echo "[FAIL] Policy file not found: policy/promptos_policy.json"
   exit 1
 fi
 POLICY_VERSION=$(grep '"required_promptos_version"' "$POLICY" | sed 's/.*: *"\([^"]*\)".*/\1/')
+POLICY_NUMERIC="${POLICY_VERSION#v}"
 
-# Registry version
 if [ ! -f "$REGISTRY" ]; then
   echo "[FAIL] Registry file not found: prompts.index.json"
   exit 1
 fi
 REGISTRY_VERSION=$(grep '"prompt_os_version"' "$REGISTRY" | sed 's/.*: *"\([^"]*\)".*/\1/')
+REGISTRY_NUMERIC="${REGISTRY_VERSION#v}"
+
+# Collect all prompt YAML versions
+PROMPT_FILES=$(find "$PROMPTS_DIR" -name '*.md' -type f | sort)
+if [ -z "$PROMPT_FILES" ]; then
+  echo "[FAIL] No prompt files found in prompts/"
+  exit 1
+fi
+
+PROMPT_VERSIONS=()
+PROMPT_PATHS=()
+for pfile in $PROMPT_FILES; do
+  rel_path="${pfile#"$REPO_ROOT/"}"
+  yaml_ver=$(awk '/^---$/{n++; next} n==1 && /^version:/{gsub(/^version: */, ""); gsub(/ *$/, ""); print}' "$pfile")
+  if [ -z "$yaml_ver" ]; then
+    echo "[FAIL] $rel_path — no version field in YAML header"
+    exit 1
+  fi
+  PROMPT_VERSIONS+=("$yaml_ver")
+  PROMPT_PATHS+=("$rel_path")
+done
 
 echo "--- Source Versions ---"
 echo "  Policy (required_promptos_version): $POLICY_VERSION"
 echo "  Registry (prompt_os_version):       $REGISTRY_VERSION"
-
-# D. Validate policy matches LATEST_TAG exactly
+for i in "${!PROMPT_PATHS[@]}"; do
+  echo "  ${PROMPT_PATHS[$i]}: ${PROMPT_VERSIONS[$i]}"
+done
 echo ""
+
+# --- C. Check all file versions are identical ---
+
+ALL_NUMERIC=("$POLICY_NUMERIC" "$REGISTRY_NUMERIC" "${PROMPT_VERSIONS[@]}")
+FIRST="${ALL_NUMERIC[0]}"
+for ver in "${ALL_NUMERIC[@]}"; do
+  if [ "$ver" != "$FIRST" ]; then
+    echo "[FAIL] Version strings are not consistent across files."
+    echo "       Found $ver but expected $FIRST (matching first source)."
+    echo ""
+    echo "  Policy:   $POLICY_NUMERIC"
+    echo "  Registry: $REGISTRY_NUMERIC"
+    for i in "${!PROMPT_PATHS[@]}"; do
+      echo "  ${PROMPT_PATHS[$i]}: ${PROMPT_VERSIONS[$i]}"
+    done
+    exit 1
+  fi
+done
+
+FILE_VERSION="$FIRST"
+
+# --- D. Determine state ---
+
 echo "--- Validation ---"
 
-if [ "$POLICY_VERSION" = "$LATEST_TAG" ]; then
-  echo "[PASS] Policy version matches git tag ($POLICY_VERSION = $LATEST_TAG)"
-else
-  echo "[FAIL] Policy version mismatch: expected $LATEST_TAG, found $POLICY_VERSION"
-  FAIL_COUNT=$((FAIL_COUNT + 1))
-fi
-
-# Registry must match LATEST_TAG (allow optional leading v but enforce consistency)
-REGISTRY_NUMERIC="${REGISTRY_VERSION#v}"
-if [ "$REGISTRY_NUMERIC" = "$NUMERIC_VERSION" ]; then
-  echo "[PASS] Registry version matches git tag ($REGISTRY_VERSION ~ $LATEST_TAG)"
-else
-  echo "[FAIL] Registry version mismatch: expected $LATEST_TAG (or $NUMERIC_VERSION), found $REGISTRY_VERSION"
-  FAIL_COUNT=$((FAIL_COUNT + 1))
-fi
-
-# All prompt YAML version fields must match numeric portion of LATEST_TAG
-echo ""
-echo "--- Prompt YAML Headers ---"
-PROMPT_FILES=$(find "$PROMPTS_DIR" -name '*.md' -type f | sort)
-
-if [ -z "$PROMPT_FILES" ]; then
-  echo "[FAIL] No prompt files found in prompts/"
-  FAIL_COUNT=$((FAIL_COUNT + 1))
-else
-  for pfile in $PROMPT_FILES; do
-    rel_path="${pfile#"$REPO_ROOT/"}"
-    # Extract version from YAML header (between --- delimiters)
-    YAML_VERSION=$(awk '/^---$/{n++; next} n==1 && /^version:/{gsub(/^version: */, ""); gsub(/ *$/, ""); print}' "$pfile")
-
-    if [ -z "$YAML_VERSION" ]; then
-      echo "[FAIL] $rel_path — no version field in YAML header"
-      FAIL_COUNT=$((FAIL_COUNT + 1))
-    elif [ "$YAML_VERSION" = "$NUMERIC_VERSION" ]; then
-      echo "[PASS] $rel_path — version $YAML_VERSION"
-    else
-      echo "[FAIL] $rel_path — expected $NUMERIC_VERSION, found $YAML_VERSION"
-      FAIL_COUNT=$((FAIL_COUNT + 1))
-    fi
+if [ "$FILE_VERSION" = "$TAG_NUMERIC" ]; then
+  # STATE A: Normal — versions match current tag
+  echo "[STATE A] Normal mode — all versions match git tag"
+  echo ""
+  echo "  File version: $FILE_VERSION"
+  echo "  Git tag:      $TAG_NUMERIC"
+  echo ""
+  for i in "${!PROMPT_PATHS[@]}"; do
+    echo "[PASS] ${PROMPT_PATHS[$i]} — version ${PROMPT_VERSIONS[$i]}"
   done
-fi
-
-# E/F. Summary
-echo ""
-echo "=== Version Consistency Summary ==="
-if [ $FAIL_COUNT -eq 0 ]; then
+  echo "[PASS] Policy — $POLICY_VERSION"
+  echo "[PASS] Registry — $REGISTRY_VERSION"
+  echo ""
+  echo "=== Version Consistency Summary ==="
   echo "[PASS] All version strings consistent with $LATEST_TAG"
   exit 0
+
+elif [ "$FILE_VERSION" = "$NEXT_PATCH" ]; then
+  # STATE B: Release PR — versions are exactly +1 patch ahead
+  echo "[STATE B] Release PR mode — versions are next patch ($NEXT_PATCH)"
+  echo ""
+  echo "  File version:     $FILE_VERSION"
+  echo "  Current git tag:  $TAG_NUMERIC"
+  echo "  Expected next:    $NEXT_PATCH"
+  echo ""
+  for i in "${!PROMPT_PATHS[@]}"; do
+    echo "[PASS] ${PROMPT_PATHS[$i]} — version ${PROMPT_VERSIONS[$i]} (release)"
+  done
+  echo "[PASS] Policy — $POLICY_VERSION (release)"
+  echo "[PASS] Registry — $REGISTRY_VERSION (release)"
+  echo ""
+  echo "=== Version Consistency Summary ==="
+  echo "[PASS] Release PR validated — all versions consistently at $NEXT_PATCH (next patch after $LATEST_TAG)"
+  exit 0
+
 else
-  echo "[FAIL] $FAIL_COUNT version mismatch(es) found."
+  # Neither state — reject
+  echo "[FAIL] Version strings do not match any valid state."
+  echo ""
+  echo "  File version:          $FILE_VERSION"
+  echo "  Current git tag:       $TAG_NUMERIC"
+  echo "  Allowed (normal):      $TAG_NUMERIC"
+  echo "  Allowed (release PR):  $NEXT_PATCH"
+  echo ""
+  echo "  Only +1 patch increment is allowed for release PRs."
+  echo "  Minor or major jumps require tagging first."
+  echo ""
+  echo "=== Version Consistency Summary ==="
+  echo "[FAIL] Version mismatch — not a valid normal or release state."
   exit 1
 fi
