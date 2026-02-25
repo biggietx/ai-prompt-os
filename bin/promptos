@@ -30,6 +30,28 @@ cmd_hooks() {
   fi
 }
 
+cmd_pas() {
+  local subcmd="${1:-}"
+  shift 2>/dev/null || true
+
+  case "$subcmd" in
+    compile)
+      exec "$REPO_ROOT/scripts/pas_compile.sh" "$@"
+      ;;
+    lint)
+      exec "$REPO_ROOT/scripts/lint_pas.sh"
+      ;;
+    *)
+      echo "Usage: promptos pas <command> [options]"
+      echo ""
+      echo "Commands:"
+      echo "  compile --stack <id> [--out <file>]   Compile a PAS stack"
+      echo "  lint                                  Validate PAS modules and stacks"
+      exit 1
+      ;;
+  esac
+}
+
 cmd_dev() {
   local PROMPTS=""
   local DEVELOPER=""
@@ -174,6 +196,10 @@ case "${1:-}" in
     shift
     cmd_dev "$@"
     ;;
+  pas)
+    shift
+    cmd_pas "$@"
+    ;;
   *)
     echo "PromptOS CLI — governed prompt management"
     echo ""
@@ -185,12 +211,18 @@ case "${1:-}" in
     echo "  ci                     Run CI checks"
     echo "  hooks install          Install git pre-commit hook"
     echo "  dev [options]          Run a governed dev session"
+    echo "  pas compile [options]  Compile a PAS stack"
+    echo "  pas lint               Validate PAS modules and stacks"
     echo ""
     echo "Dev options:"
     echo "  --prompts \"P00,P01\"    Prompt IDs used (required)"
     echo "  --developer \"name\"     Developer name (required)"
     echo "  --target-repo \"repo\"   Target repository (required)"
     echo "  --notes \"text\"         Session notes (optional)"
+    echo ""
+    echo "PAS compile options:"
+    echo "  --stack \"STACK-ID\"     Stack ID to compile (required)"
+    echo "  --out \"file\"           Output file (default: stdout)"
     exit 1
     ;;
 esac
