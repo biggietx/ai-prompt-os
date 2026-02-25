@@ -27,6 +27,16 @@ jobs:
       - name: Validate PAS
         run: ./scripts/lint_pas.sh
 
+      - name: PAS Compile Smoke Test
+        run: |
+          if ls pas/stacks/*.json 1>/dev/null 2>&1; then
+            STACK_ID=$(jq -r '.id' pas/stacks/*.json | head -1)
+            ./scripts/pas_compile.sh --stack "$STACK_ID" --out /tmp/pas_smoke.txt 2>&1
+            shasum -a 256 /tmp/pas_smoke.txt
+          else
+            echo "[INFO] No stacks — skipping compile smoke test."
+          fi
+
       - name: Version Consistency Check
         run: ./scripts/check_version_consistency.sh
 

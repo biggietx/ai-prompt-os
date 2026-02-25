@@ -96,6 +96,25 @@ if [ -f "$ARTIFACT" ] && [ -f "$HASH_FILE" ]; then
   else
     echo "[INFO] jq not available — skipping chain field checks."
   fi
+
+  # 6. Verify PAS compiled hash (if pas block exists)
+  if command -v jq > /dev/null 2>&1 && jq -e '.pas.compiled_hash' "$ARTIFACT" > /dev/null 2>&1; then
+    PAS_COMPILED="$ARTIFACT_DIR/pas_compiled.txt"
+    STORED_PAS_HASH=$(jq -r '.pas.compiled_hash' "$ARTIFACT")
+    if [ ! -f "$PAS_COMPILED" ]; then
+      echo "[FAIL] pas block present but pas_compiled.txt missing."
+      FAIL_COUNT=$((FAIL_COUNT + 1))
+    else
+      COMPUTED_PAS_HASH=$(shasum -a 256 "$PAS_COMPILED" | cut -d ' ' -f 1)
+      if [ "$STORED_PAS_HASH" = "$COMPUTED_PAS_HASH" ]; then
+        echo "[PASS] PAS compiled hash valid."
+      else
+        echo "[FAIL] PAS compiled hash mismatch."
+        FAIL_COUNT=$((FAIL_COUNT + 1))
+      fi
+    fi
+  fi
+
 fi
 
 echo ""

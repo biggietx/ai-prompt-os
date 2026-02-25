@@ -1,0 +1,3 @@
+# Compiled PAS outputs are local — do not commit
+*.txt
+!.gitignore

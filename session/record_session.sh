@@ -10,9 +10,10 @@ PROMPTS=""
 DEVELOPER=""
 TARGET_REPO=""
 NOTES=""
+PAS_STACK=""
 
 usage() {
-  echo "Usage: $0 --prompts \"P00,P01,...\" --developer \"name\" --target-repo \"repo\" [--notes \"text\"]"
+  echo "Usage: $0 --prompts \"P00,P01,...\" --developer \"name\" --target-repo \"repo\" [--notes \"text\"] [--pas-stack \"STACK-ID\"]"
   exit 1
 }
 
@@ -33,6 +34,10 @@ while [ $# -gt 0 ]; do
       ;;
     --notes)
       NOTES="$2"
+      shift 2
+      ;;
+    --pas-stack)
+      PAS_STACK="$2"
       shift 2
       ;;
     *)
@@ -71,6 +76,47 @@ else
   exit 1
 fi
 
+# PAS compilation (if --pas-stack provided)
+PAS_COMPILED_FILE=""
+PAS_COMPILED_HASH=""
+PAS_STACK_VERSION=""
+if [ -n "$PAS_STACK" ]; then
+  echo ""
+  echo "--- PAS Stack Compilation ---"
+  PAS_COMPILE_SCRIPT="$REPO_ROOT/scripts/pas_compile.sh"
+  if [ ! -x "$PAS_COMPILE_SCRIPT" ]; then
+    echo "[FAIL] pas_compile.sh not found or not executable."
+    exit 1
+  fi
+
+  # Create PAS output directory
+  PAS_DIR="$REPO_ROOT/session/pas"
+  mkdir -p "$PAS_DIR"
+  PAS_COMPILED_FILE="$PAS_DIR/${SESSION_ID}-compiled.txt"
+
+  # Compile stack to file (stderr has status, stdout has content)
+  if ! "$PAS_COMPILE_SCRIPT" --stack "$PAS_STACK" --out "$PAS_COMPILED_FILE" 2>&1; then
+    echo "[FAIL] PAS compilation failed — session not recorded."
+    exit 1
+  fi
+
+  # Compute hash of compiled output
+  PAS_COMPILED_HASH=$(shasum -a 256 "$PAS_COMPILED_FILE" | cut -d ' ' -f 1)
+  echo "[PASS] PAS compiled hash: $PAS_COMPILED_HASH"
+
+  # Extract stack version from stack file
+  STACKS_DIR="$REPO_ROOT/pas/stacks"
+  for sfile in $(find "$STACKS_DIR" -name '*.json' -type f 2>/dev/null); do
+    SID=$(jq -r '.id' "$sfile" 2>/dev/null)
+    if [ "$SID" = "$PAS_STACK" ]; then
+      PAS_STACK_VERSION=$(jq -r '.version' "$sfile" 2>/dev/null)
+      break
+    fi
+  done
+  echo "[PASS] PAS stack: $PAS_STACK v$PAS_STACK_VERSION"
+  echo ""
+fi
+
 # Build JSON array of prompts used
 PROMPTS_JSON="["
 FIRST=true
@@ -98,6 +144,24 @@ NOTES_ESCAPED=$(echo "$NOTES" | sed 's/\\/\\\\/g; s/"/\\"/g')
 
 # Write base session JSON (without chain fields)
 SESSION_FILE="$LOGS_DIR/session-${SESSION_ID}.json"
+if [ -n "$PAS_STACK" ]; then
+cat > "$SESSION_FILE" <<EOF
+{
+  "timestamp_utc": "${TIMESTAMP}",
+  "prompt_os_version": "${PROMPT_OS_VERSION}",
+  "prompts_used": ${PROMPTS_JSON},
+  "developer": "${DEVELOPER}",
+  "target_repo": "${TARGET_REPO}",
+  "notes": "${NOTES_ESCAPED}",
+  "lint_passed": ${LINT_PASSED},
+  "pas": {
+    "stack_id": "${PAS_STACK}",
+    "stack_version": "${PAS_STACK_VERSION}",
+    "compiled_hash": "${PAS_COMPILED_HASH}"
+  }
+}
+EOF
+else
 cat > "$SESSION_FILE" <<EOF
 {
   "timestamp_utc": "${TIMESTAMP}",
@@ -109,6 +173,7 @@ cat > "$SESSION_FILE" <<EOF
   "lint_passed": ${LINT_PASSED}
 }
 EOF
+fi
 
 # Normalize base JSON with jq for deterministic hashing
 NORMALIZED_BASE=$(jq '.' "$SESSION_FILE")
