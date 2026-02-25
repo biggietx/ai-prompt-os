@@ -174,6 +174,107 @@ else
 fi
 echo ""
 
+# --- Module Registry Enforcement ---
+
+MODULES_REGISTRY="$PAS_DIR/registry/modules.index.json"
+echo "--- Module Registry Enforcement ---"
+if [ ! -f "$MODULES_REGISTRY" ]; then
+  echo "  [FAIL] modules.index.json not found"
+  FAIL_COUNT=$((FAIL_COUNT + 1))
+elif ! jq empty "$MODULES_REGISTRY" 2>/dev/null; then
+  echo "  [FAIL] modules.index.json is not valid JSON"
+  FAIL_COUNT=$((FAIL_COUNT + 1))
+else
+  # Every module file must be listed in registry
+  if [ -n "${MODULE_FILES:-}" ]; then
+    for mfile in $MODULE_FILES; do
+      rel_path="${mfile#"$REPO_ROOT/"}"
+      if ! jq -e --arg p "$rel_path" 'map(.path) | index($p) != null' "$MODULES_REGISTRY" > /dev/null 2>&1; then
+        echo "  [FAIL] Module file not in registry: $rel_path"
+        FAIL_COUNT=$((FAIL_COUNT + 1))
+      fi
+    done
+  fi
+
+  # Every registry entry must point to an existing file
+  REG_PATHS=$(jq -r '.[].path' "$MODULES_REGISTRY" 2>/dev/null)
+  for rpath in $REG_PATHS; do
+    if [ ! -f "$REPO_ROOT/$rpath" ]; then
+      echo "  [FAIL] Registry entry points to missing file: $rpath"
+      FAIL_COUNT=$((FAIL_COUNT + 1))
+    fi
+  done
+
+  # Registry IDs must match file IDs
+  REG_ENTRIES=$(jq -c '.[]' "$MODULES_REGISTRY" 2>/dev/null)
+  while IFS= read -r entry; do
+    reg_id=$(echo "$entry" | jq -r '.id')
+    reg_path=$(echo "$entry" | jq -r '.path')
+    if [ -f "$REPO_ROOT/$reg_path" ]; then
+      file_id=$(jq -r '.id' "$REPO_ROOT/$reg_path" 2>/dev/null)
+      if [ "$reg_id" != "$file_id" ]; then
+        echo "  [FAIL] Registry ID mismatch: registry says \"$reg_id\", file says \"$file_id\" ($reg_path)"
+        FAIL_COUNT=$((FAIL_COUNT + 1))
+      fi
+    fi
+  done <<< "$REG_ENTRIES"
+
+  if [ $FAIL_COUNT -eq 0 ] || echo "" > /dev/null; then
+    # Count checks that passed in this section
+    echo "  [PASS] Module registry consistent"
+  fi
+fi
+echo ""
+
+# --- Stack Registry Enforcement ---
+
+STACKS_REGISTRY="$PAS_DIR/registry/stacks.index.json"
+echo "--- Stack Registry Enforcement ---"
+if [ ! -f "$STACKS_REGISTRY" ]; then
+  echo "  [FAIL] stacks.index.json not found"
+  FAIL_COUNT=$((FAIL_COUNT + 1))
+elif ! jq empty "$STACKS_REGISTRY" 2>/dev/null; then
+  echo "  [FAIL] stacks.index.json is not valid JSON"
+  FAIL_COUNT=$((FAIL_COUNT + 1))
+else
+  # Every stack file must be listed in registry
+  if [ -n "${STACK_FILES:-}" ]; then
+    for sfile in $STACK_FILES; do
+      rel_path="${sfile#"$REPO_ROOT/"}"
+      if ! jq -e --arg p "$rel_path" 'map(.path) | index($p) != null' "$STACKS_REGISTRY" > /dev/null 2>&1; then
+        echo "  [FAIL] Stack file not in registry: $rel_path"
+        FAIL_COUNT=$((FAIL_COUNT + 1))
+      fi
+    done
+  fi
+
+  # Every registry entry must point to an existing file
+  REG_PATHS=$(jq -r '.[].path' "$STACKS_REGISTRY" 2>/dev/null)
+  for rpath in $REG_PATHS; do
+    if [ ! -f "$REPO_ROOT/$rpath" ]; then
+      echo "  [FAIL] Registry entry points to missing file: $rpath"
+      FAIL_COUNT=$((FAIL_COUNT + 1))
+    fi
+  done
+
+  # Registry IDs must match file IDs
+  REG_ENTRIES=$(jq -c '.[]' "$STACKS_REGISTRY" 2>/dev/null)
+  while IFS= read -r entry; do
+    reg_id=$(echo "$entry" | jq -r '.id')
+    reg_path=$(echo "$entry" | jq -r '.path')
+    if [ -f "$REPO_ROOT/$reg_path" ]; then
+      file_id=$(jq -r '.id' "$REPO_ROOT/$reg_path" 2>/dev/null)
+      if [ "$reg_id" != "$file_id" ]; then
+        echo "  [FAIL] Registry ID mismatch: registry says \"$reg_id\", file says \"$file_id\" ($reg_path)"
+        FAIL_COUNT=$((FAIL_COUNT + 1))
+      fi
+    fi
+  done <<< "$REG_ENTRIES"
+
+  echo "  [PASS] Stack registry consistent"
+fi
+echo ""
+
 # --- Summary ---
 
 echo "=== PAS Lint Summary ==="
