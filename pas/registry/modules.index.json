@@ -22,5 +22,9 @@
   {
     "id": "code-security-310",
     "path": "pas/modules/300_code_policies/code_security.json"
+  },
+  {
+    "id": "pref-verbose-explanations-910",
+    "path": "pas/modules/900_personal_preferences/verbose_explanations.json"
   }
 ]

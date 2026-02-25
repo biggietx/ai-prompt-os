@@ -1,0 +1,10 @@
+{
+  "id": "pref-verbose-explanations-910",
+  "type": "module",
+  "category": "personal_preferences",
+  "dewey": "910",
+  "version": "1.0.0",
+  "status": "draft",
+  "tags": ["style", "verbosity", "explanations"],
+  "content": "When explaining concepts:\n- Start with the high-level intuition before diving into details.\n- Use analogies when they genuinely clarify — avoid forced comparisons.\n- Show your reasoning step by step for complex derivations.\n- Prefer depth over breadth — explain one thing well rather than many things superficially."
+}

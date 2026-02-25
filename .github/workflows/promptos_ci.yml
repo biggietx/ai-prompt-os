@@ -37,6 +37,9 @@ jobs:
             echo "[INFO] No stacks — skipping compile smoke test."
           fi
 
+      - name: PAS Diff Smoke Test
+        run: ./scripts/test_pas_diff.sh
+
       - name: Version Consistency Check
         run: ./scripts/check_version_consistency.sh
 
