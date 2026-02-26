@@ -38,6 +38,9 @@ cmd_pas() {
     compile)
       exec "$REPO_ROOT/scripts/pas_compile.sh" "$@"
       ;;
+    diff)
+      exec "$REPO_ROOT/scripts/pas_diff.sh" "$@"
+      ;;
     lint)
       exec "$REPO_ROOT/scripts/lint_pas.sh"
       ;;
@@ -45,8 +48,9 @@ cmd_pas() {
       echo "Usage: promptos pas <command> [options]"
       echo ""
       echo "Commands:"
-      echo "  compile --stack <id> [--out <file>]   Compile a PAS stack"
-      echo "  lint                                  Validate PAS modules and stacks"
+      echo "  compile --stack <id> [--out <file>]                Compile a PAS stack"
+      echo "  diff --from <id> --to <id> [--format json|md]     Structural diff between stacks"
+      echo "  lint                                               Validate PAS modules and stacks"
       exit 1
       ;;
   esac

@@ -2,5 +2,9 @@
   {
     "id": "STACK-GLOBAL-BASE-001",
     "path": "pas/stacks/global_base.json"
+  },
+  {
+    "id": "STACK-GLOBAL-BASE-002",
+    "path": "pas/stacks/global_base_v2.json"
   }
 ]
